@@ -1,2 +1,2 @@
 # football-role-classification-ml
-Football player role classification using Custom CNN, ResNet50 &amp; MobileNetV2 with Grad-CAM and LIME explainability on the FIFA 22 dataset.
+This project classifies football players into four roles — Goalkeeper, Defender, Midfielder, and Forward — using deep learning applied to FIFA 22 player portrait images. Three models are built and compared: a custom CNN trained from scratch, and two transfer learning models (ResNet50 and MobileNetV2). Explainability is provided through Grad-CAM heatmaps, saliency maps, and LIME, making the classification decisions interpretable. Developed as part of a Machine Learning course assignment, May 2026.
