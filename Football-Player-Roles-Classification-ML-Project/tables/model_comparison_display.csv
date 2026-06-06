@@ -1,0 +1,4 @@
+Model,Test Accuracy,Macro F1,Weighted F1,Macro Prec,Macro Rec
+ResNet50,0.3812,0.3740,0.3740,0.3729,0.3813
+MobileNetV2,0.3375,0.3202,0.3202,0.3559,0.3375
+CustomCNN,0.2979,0.2073,0.2073,0.1753,0.2979
