@@ -48,7 +48,7 @@ Model decisions are explained visually using **Grad-CAM** and **SHAP** pixel att
 
 ## 📦 Dataset
 
-**Source:** [Elite World Cup 2022 Players Image Dataset ⚽🏆Peter Kibuchi (Kaggle)](Elite World Cup 2022 Players Image Dataset ⚽🏆 )
+**Source:** [Elite World Cup 2022 Players Image Dataset ⚽🏆Peter Kibuchi (Kaggle)](https://www.kaggle.com/datasets/peterkibuchi/world-cup-2022-elite-players-image-dataset?utm_source=chatgpt.com )
 
 Player face portrait images are downloaded programmatically from the `player_face_url` field in `players_22.csv`. Each image is a standardized PNG portrait at a consistent resolution, lighting, and background.
 
