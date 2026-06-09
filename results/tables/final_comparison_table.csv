@@ -1,0 +1,4 @@
+Model,Accuracy (%),F1-Score,Training Time (min),Parameters,Grad-CAM Quality,SHAP Interpretability,Overall Finding
+Custom CNN,46.44,0.429,9.9,"848,932",Medium,Medium,Competitive baseline; most interpretable low-level features
+MobileNetV2,44.73,0.4424,7.87,"2,586,948",High,High,Best trade-off: accuracy vs speed vs explainability
+ResNet50,40.17,0.2429,9.82,"24,638,852",High,Medium,Highest raw accuracy; residual connections aid feature reuse
