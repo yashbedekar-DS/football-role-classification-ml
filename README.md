@@ -1,239 +1,259 @@
-# Football Player Role Classification
+# ⚽ Football Player Roles Classification using CNN-Based Deep Learning
 
-This project uses a CNN-based image classification workflow to predict a football player's role from a portrait image.
+> Classifying football players into **Goalkeeper, Defender, Midfielder, and Forward** roles from portrait images using custom and transfer learning CNN models.
 
-The notebook behind this project is:
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python)](https://www.python.org/)
+[![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange?logo=tensorflow)](https://www.tensorflow.org/)
+[![Keras](https://img.shields.io/badge/Keras-2.x-red?logo=keras)](https://keras.io/)
+[![Kaggle Notebook](https://img.shields.io/badge/Kaggle-Notebook-20BEFF?logo=kaggle)](https://www.kaggle.com/code/yashbedekar07/football-player-role-classification-ml-notebook)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-- [football-player-role-classification-cnn-ml.ipynb](./notebook/football-player-role-classification-cnn-ml.ipynb)
+---
 
-It compares three approaches:
+## 📋 Table of Contents
 
-- Custom CNN
-- MobileNetV2 transfer learning
-- ResNet50 transfer learning
+- [Project Overview](#-project-overview)
+- [Dataset](#-dataset)
+- [Methodology](#-methodology)
+- [Model Architectures](#-model-architectures)
+- [Results](#-results)
+- [Explainability (Grad-CAM & SHAP)](#-explainability-grad-cam--shap)
+- [Project Structure](#-project-structure)
+- [Setup & Usage](#-setup--usage)
+- [References](#-references)
 
-The task is to classify each player into one of four roles:
+---
 
-- Goalkeeper
-- Defender
-- Midfielder
-- Forward
+## 🔍 Project Overview
 
-## Project Idea
+In modern football, player analysis is a critical part of team strategy, scouting, and recruitment. This project explores whether a **Convolutional Neural Network (CNN)** can learn visual patterns from player portrait images alone — such as body type, build, and posture — to accurately predict a player's **positional role**.
 
-The main goal of the notebook is to test how far image-based role classification can go when the model only sees a player portrait rather than a full match image.
+This is a **4-class image classification** problem:
 
-This is a difficult problem because role clues are often subtle. A portrait may show kit details, facial appearance, or image style, but it does not directly show field position or in-game action. That is why the project is useful for comparison, explainability, and model analysis, even though the accuracy is not expected to be extremely high.
+| Label | Role |
+|-------|------|
+| `GK` | Goalkeeper |
+| `DEF` | Defender |
+| `MID` | Midfielder |
+| `FWD` | Forward |
 
-## Notebook Workflow
+Three models are trained and compared:
+- ✅ **Custom CNN** (built from scratch)
+- ✅ **MobileNetV2** (transfer learning + fine-tuning)
+- ✅ **ResNet50** (transfer learning + fine-tuning)
 
-The notebook follows this pipeline:
+Model decisions are explained visually using **Grad-CAM** and **SHAP** pixel attribution.
 
-1. Load the World Cup 2022 elite players dataset.
-2. Map FIFA position groups into four role labels.
-3. Organize images into train, validation, and test folders.
-4. Build data generators with augmentation for training.
-5. Train three models:
-   - a custom CNN from scratch
-   - MobileNetV2 with transfer learning
-   - ResNet50 with transfer learning
-6. Evaluate all models on the held-out test set.
-7. Save plots, tables, and model checkpoints into the `results/` folder.
-8. Generate explainability outputs using Grad-CAM and SHAP.
+---
 
-## Dataset Structure
+## 📦 Dataset
 
-The notebook creates a balanced split across the four roles.
+**Source:** [FIFA 22 Complete Player Dataset — Stefano Leone (Kaggle)](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset)
 
-| Role | Train | Val | Test | Total |
-|---|---:|---:|---:|---:|
-| GK | 173 | 37 | 38 | 248 |
-| DEF | 278 | 60 | 60 | 398 |
-| MID | 525 | 112 | 113 | 750 |
-| FWD | 650 | 139 | 140 | 929 |
+Player face portrait images are downloaded programmatically from the `player_face_url` field in `players_22.csv`. Each image is a standardized PNG portrait at a consistent resolution, lighting, and background.
 
-The notebook also confirms the final image counts:
+### Dataset Summary
 
-- Train: 1626 images
-- Validation: 348 images
-- Test: 351 images
+| Attribute | Details |
+|-----------|---------|
+| Total Images (after balancing) | 3,200 |
+| Number of Classes | 4 |
+| Images per Class | 800 (balanced) |
+| Image Format | PNG (RGB) |
+| Input Resolution | 224 × 224 pixels |
+| Total Players in Raw CSV | ~19,239 |
 
-## Role Mapping
+### Raw Class Distribution (Before Balancing)
 
-The notebook maps FIFA position groups into the four role classes:
+| Role | Player Count | % of Total |
+|------|-------------|-----------|
+| Goalkeeper | 2,132 | 11.1% |
+| Defender | 6,394 | 33.2% |
+| Midfielder | 7,033 | 36.6% |
+| Forward | 3,680 | 19.1% |
 
-| FIFA Position Group | Role |
-|---|---|
-| GK | Goalkeeper |
-| CB, LB, RB, LCB, RCB, LWB, RWB | Defender |
-| CM, CDM, CAM, LM, RM, LCM, RCM, LDM, RDM, LAM, RAM | Midfielder |
-| ST, CF, LW, RW, LF, RF, LS, RS | Forward |
+> **Imbalance handling:** Stratified sampling was applied to cap each class at **800 images**, producing a perfectly balanced dataset of 3,200 images.
 
-## Models Used
+### Train / Validation / Test Split (70 / 15 / 15)
 
-### Custom CNN
+| Split | GK | DEF | MID | FWD | Total |
+|-------|----|-----|-----|-----|-------|
+| Train (70%) | 560 | 560 | 560 | 560 | 2,240 |
+| Validation (15%) | 120 | 120 | 120 | 120 | 480 |
+| Test (15%) | 120 | 120 | 120 | 120 | 480 |
 
-The custom CNN is a smaller model built from scratch. It uses:
+---
 
-- convolution layers
-- batch normalization
-- max pooling
-- dropout
-- global average pooling
-- softmax classification output
+## 🔧 Methodology
 
-This model is useful as a baseline because it learns directly from the dataset without pretrained weights.
+### 1. Data Collection & Role Mapping
+Player positions from the FIFA 22 CSV (`GK`, `CB`, `RB`, `CM`, `CAM`, `ST`, `LW`, etc.) are mapped to one of four high-level roles. Players with null positions or missing face URLs are discarded.
 
-### MobileNetV2
+### 2. Image Downloading & Validation
+Images are downloaded in parallel using a threaded pipeline with retry logic. Each download is validated with PIL (Pillow) to discard corrupt files.
 
-MobileNetV2 is used as a pretrained feature extractor. It is smaller and faster than ResNet50, and it usually works well when the dataset is not very large.
+### 3. Dataset Balancing & Splitting
+Stratified sampling limits each class to 800 images. The balanced dataset is split with `sklearn.model_selection.train_test_split` using stratification.
 
-### ResNet50
-
-ResNet50 is the largest model in the notebook. It has more parameters and stronger representation capacity, but it also takes longer to train and can overfit more easily on smaller datasets.
-
-## Output Files
-
-The notebook writes its outputs into `results/`.
-
-### Figures
-
-- `fig1_dataset_samples.png` shows sample player images from each class.
-- `fig2_model_workflow.png` shows the end-to-end project workflow.
-- `fig2b_class_distribution.png` shows the class distribution across train, validation, and test splits.
-- `fig3_training_curves.png` shows training and validation curves.
-- `fig4_confusion_matrices.png` shows normalized confusion matrices for the three models.
-- `fig5_gradcam_correct.png` shows Grad-CAM examples for correct predictions.
-- `fig6_gradcam_misclassified.png` shows Grad-CAM examples for wrong predictions.
-- `fig7_shap_custom_cnn.png` shows SHAP explanations for the custom CNN.
-- `fig7_shap_mobilenetv2.png` shows SHAP explanations for MobileNetV2.
-- `fig7_shap_resnet50.png` shows SHAP explanations for ResNet50.
-- `fig8_final_comparison.png` shows the final comparison chart.
-
-### Tables
-
-- `dataset_summary.csv` stores the final role counts for each split.
-- `CustomCNN_history.csv` stores the epoch-by-epoch training history for the custom CNN.
-- `MobileNetV2_history.csv` stores the epoch-by-epoch training history for MobileNetV2.
-- `ResNet50_history.csv` stores the epoch-by-epoch training history for ResNet50.
-- `model_comparison.csv` stores the test metrics for each model.
-- `final_comparison_table.csv` stores the summary table used in the final report section.
-
-### Model Files
-
-The `.keras` files are saved checkpoints so that the trained models can be loaded again without retraining.
-
-## Accuracy Table Explanation
-
-The most important result in the notebook is the final comparison table. It reports:
-
-- `Test Accuracy (%)`: the percentage of correct predictions on the test set
-- `Precision`: how reliable the model's positive predictions are
-- `Recall`: how many true samples the model found
-- `F1-Score`: the balance between precision and recall
-- `Train Time (min)`: how long training took
-- `Parameters`: how large the model is
-
-### Accuracy Results Captured in the Notebook Output
-
-The notebook output shows these final test results:
-
-| Model | Test Accuracy (%) | Precision | Recall | F1-Score | Train Time (min) | Parameters |
-|---|---:|---:|---:|---:|---:|---:|
-| Custom CNN | 39.89 | 0.1591 | 0.3989 | 0.2275 | 4.51 | 848,932 |
-| MobileNetV2 | 49.00 | 0.5071 | 0.4900 | 0.4815 | 8.29 | 2,586,948 |
-| ResNet50 | 40.46 | 0.4012 | 0.4046 | 0.2442 | 10.10 | 24,638,852 |
-
-### Why the Table Looks Like This
-
-- MobileNetV2 performs best in the notebook run because it gives the highest accuracy and strongest F1-score.
-- The custom CNN trains faster and is simpler, but it does not separate the four role classes as well as MobileNetV2.
-- ResNet50 has the most parameters, but more parameters do not automatically mean better performance when the dataset is relatively small.
-
-The values are close enough to show that this is a challenging four-class problem. The models are learning some useful image patterns, but the portraits do not contain full tactical context.
-
-## Why the Accuracy Is Not Very High
-
-The notebook's accuracy is modest for a few important reasons:
-
-- the input is only a portrait image, not a full match scene
-- role information is indirect and visually subtle
-- different roles can look similar in portrait-only images
-- the dataset is much smaller than typical large-scale vision datasets
-- transfer learning helps, but it cannot replace missing context
-
-This is also why the notebook includes confusion matrices, Grad-CAM, and SHAP, not just accuracy.
-
-## Explainability Outputs
-
-The project uses two explainability methods:
-
-- Grad-CAM highlights the areas of the image that most influence the prediction.
-- SHAP estimates how image regions contribute to each class decision.
-
-These outputs are useful because they help show whether the model is focusing on meaningful football-related cues or just learning background and texture patterns.
-
-## What the Project Files Mean
-
-### `notebook/`
-
-Contains the main notebook that performs preprocessing, training, evaluation, and explainability.
-
-### `results/figures/`
-
-Contains all charts and visual explanations created by the notebook.
-
-### `results/tables/`
-
-Contains CSV summaries for the dataset split, training histories, and final metrics.
-
-### `results/models/`
-
-Contains the saved trained model checkpoints.
-
-### `role_dataset/`
-
-Contains the organized train, validation, and test image folders created by the notebook.
-
-## Reproducibility Note
-
-If the notebook is rerun, the exact metric values may change slightly because of:
-
-- random weight initialization
-- data shuffling
-- augmentation randomness
-- GPU and training nondeterminism
-
-So the values in the notebook output cells are the most direct record of that run. The CSV tables in `results/tables/` may reflect a later rerun if the notebook was executed again after the displayed outputs were captured.
-
-## How to Run
-
-### In Kaggle
-
-1. Open the notebook in Kaggle.
-2. Attach the FIFA 22 player dataset.
-3. Run all cells.
-4. Check the `results/` folder for generated figures, tables, and model files.
-
-### Locally
-
-```bash
-pip install tensorflow keras pandas numpy matplotlib seaborn scikit-learn pillow requests shap opencv-python-headless
-jupyter notebook notebook/football-player-role-classification-cnn-ml.ipynb
+### 4. Data Augmentation Pipeline (tf.data)
+Training images are augmented on-the-fly using Keras augmentation layers:
+- Random horizontal flip
+- Random rotation (±8°)
+- Random zoom (±10%)
+- Random contrast adjustment (±10%)
+
+### 5. Model Training & Evaluation
+Three models are trained; transfer learning models use a **two-phase strategy**:
+- **Phase 1 (Feature Extraction):** Base model frozen, classification head trained for up to 8 epochs
+- **Phase 2 (Fine-Tuning):** Last 30 layers unfrozen, trained at reduced LR (`1e-5`) for up to 5 epochs
+
+### 6. Explainability
+Model decisions are inspected using **Grad-CAM** (region-level heatmaps) and **SHAP** (pixel-level attribution).
+
+---
+
+## 🏗️ Model Architectures
+
+### Custom CNN (Built from Scratch)
+
+| Layer / Block | Configuration | Output Shape |
+|---------------|--------------|--------------|
+| Input | 224 × 224 × 3 RGB | 224 × 224 × 3 |
+| Rescaling | Normalize to [0, 1] | 224 × 224 × 3 |
+| Block 1: Conv2D ×2 | 32 filters, 3×3, ReLU, BatchNorm | 224 × 224 × 32 |
+| Block 1: MaxPool + Dropout | 2×2 pool, 15% | 112 × 112 × 32 |
+| Block 2: Conv2D ×2 | 64 filters, 3×3, ReLU, BatchNorm | 112 × 112 × 64 |
+| Block 2: MaxPool + Dropout | 2×2 pool, 20% | 56 × 56 × 64 |
+| Block 3: Conv2D ×3 | 128 filters, 3×3, ReLU, BatchNorm | 56 × 56 × 128 |
+| Block 3: MaxPool + Dropout | 2×2 pool, 25% | 28 × 28 × 128 |
+| GlobalAveragePooling2D | — | 128 |
+| Dense + Dropout | 128 neurons, ReLU, 40% | 128 |
+| Output (Softmax) | 4 classes | 4 |
+
+> **Total Trainable Parameters:** 453,412 &nbsp;|&nbsp; **Optimizer:** Adam &nbsp;|&nbsp; **Loss:** Categorical Cross-Entropy
+
+### Transfer Learning Models
+
+| Model | Base | Fine-Tuned Layers | Parameters |
+|-------|------|-------------------|-----------|
+| ResNet50 | ResNet50 (ImageNet) | Last 30 layers | ~23.6M |
+| MobileNetV2 | MobileNetV2 (ImageNet) | Last 30 layers | ~2.3M |
+
+Both transfer models use the same classification head:
+`GlobalAveragePooling2D → Dropout(0.4) → Dense(4, softmax)`
+
+---
+
+## 📊 Results
+
+### Final Model Comparison (Test Set)
+
+| Model | Test Accuracy | Macro F1-Score | Parameters |
+|-------|-------------|----------------|-----------|
+| **Custom CNN** | **46.44%** | 0.4290 | 453,412 |
+| MobileNetV2 | 44.73% | **0.4424** | ~2.3M |
+| ResNet50 | 40.17% | 0.2429 | ~23.6M |
+
+> All models exceed the **25% random baseline**, confirming that meaningful visual patterns exist in player portrait images — despite the inherent visual ambiguity of the classification task.
+
+### Key Observations
+
+- The **Custom CNN** achieves the highest test accuracy (46.44%), generalizing well on this small, visually ambiguous dataset while avoiding the over-parameterization risk of deeper architectures.
+- **MobileNetV2** achieves the best Precision (0.4807) and Macro F1 (0.4424), offering the best trade-off between accuracy and reliability.
+- **ResNet50** underperforms relative to its size, likely due to the small dataset size and insufficient fine-tuning epochs.
+- The most frequent confusion occurs between **Midfielder and Forward** roles — expected, given the visual similarity of players in these positions.
+
+---
+
+## 🔍 Explainability (Grad-CAM & SHAP)
+
+**Grad-CAM** heatmaps show which image regions the model attends to when making predictions:
+- ✅ *Correctly classified* images show focused attention on the **upper body, jersey, and shoulder regions**
+- ❌ *Misclassified* images show diffuse or background-directed attention, reflecting the model's uncertainty
+
+**SHAP pixel attribution** confirms that:
+- No single dominant pixel region drives predictions across all models
+- Attribution is broadly distributed, consistent with the visual ambiguity of this classification task
+
+---
+
+## 📁 Project Structure
+
+```
+football-role-classification-ml/
+│
+├── notebooks/
+│   └── Football_Player_Role_Classification_ML_Notebook.ipynb
+│
+├── data/                        # (Not included — downloaded at runtime)
+│   ├── GK/
+│   ├── DEF/
+│   ├── MID/
+│   └── FWD/
+│
+├── outputs/
+│   ├── figures/                 # Training curves, confusion matrices, Grad-CAM, SHAP
+│   └── models/                  # Saved model weights (optional)
+│
+├── README.md
+└── requirements.txt
 ```
 
-## References
+---
 
-- FIFA 22 World Cup elite players image dataset
-- He et al., Deep Residual Learning for Image Recognition
-- Sandler et al., MobileNetV2: Inverted Residuals and Linear Bottlenecks
-- Selvaraju et al., Grad-CAM: Visual Explanations from Deep Networks
-- Lundberg and Lee, A Unified Approach to Interpreting Model Predictions
+## 🚀 Setup & Usage
 
-## Author
+### Requirements
 
-Yash David Bedekar
+```bash
+pip install tensorflow keras scikit-learn pillow matplotlib seaborn shap
+```
 
-Machine Learning Course Project
+Or install from requirements:
 
-GitHub: [@yashbedekar-DS](https://github.com/yashbedekar-DS)
+```bash
+pip install -r requirements.txt
+```
+
+### Running the Notebook
+
+This project is designed to run on **Kaggle Notebooks** with GPU acceleration.
+
+1. Open the notebook on Kaggle: [Football Player Role Classification ML Notebook](https://www.kaggle.com/code/yashbedekar07/football-player-role-classification-ml-notebook)
+2. Attach the [FIFA 22 Complete Player Dataset](https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset) as an input dataset
+3. Enable GPU accelerator (P100 recommended)
+4. Run all cells in order
+
+### To Run Locally
+
+```bash
+git clone https://github.com/yashbedekar-DS/football-role-classification-ml.git
+cd football-role-classification-ml
+jupyter notebook notebooks/Football_Player_Role_Classification_ML_Notebook.ipynb
+```
+
+> ⚠️ Local execution requires a stable internet connection for the image download step and a CUDA-enabled GPU for reasonable training times.
+
+---
+
+## 📚 References
+
+- **FIFA 22 Complete Player Dataset** — Stefano Leone, Kaggle (2022). https://www.kaggle.com/datasets/stefanoleone992/fifa-22-complete-player-dataset
+- He, K., Zhang, X., Ren, S., & Sun, J. (2016). *Deep Residual Learning for Image Recognition.* CVPR 2016.
+- Howard, A. G. et al. (2017). *MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.* arXiv:1704.04861.
+- Sandler, M. et al. (2018). *MobileNetV2: Inverted Residuals and Linear Bottlenecks.* CVPR 2018.
+- Selvaraju, R. R. et al. (2017). *Grad-CAM: Visual Explanations from Deep Networks via Gradient-based Localization.* ICCV 2017.
+- Lundberg, S. M., & Lee, S. I. (2017). *A Unified Approach to Interpreting Model Predictions (SHAP).* NeurIPS 2017.
+- TensorFlow/Keras Documentation — https://www.tensorflow.org/api_docs
+
+---
+
+## 👤 Author
+
+**Yash David Bedekar**  
+MSc Data Science — University of Europe for Applied Sciences, Potsdam  
+📧 [GitHub Profile](https://github.com/yashbedekar-DS) &nbsp;|&nbsp; 🏆 [Kaggle Profile](https://www.kaggle.com/yashbedekar07)
+
+---
+
+*Machine Learning Course Project — June 2026*
