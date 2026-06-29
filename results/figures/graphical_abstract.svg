@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Graphical Abstract — Football Player Role Classification
+  Custom CNN vs MobileNetV2 vs ResNet50 · Grad-CAM · SHAP
+  Usage in Overleaf:
+    \usepackage{graphicx}
+    \includegraphics[width=\linewidth]{graphical_abstract.pdf}
+  Convert SVG → PDF before submission:
+    inkscape --export-filename=graphical_abstract.pdf graphical_abstract.svg
+  or use https://cloudconvert.com/svg-to-pdf
+-->
+<svg width="680" height="820" viewBox="0 0 680 820"
+     xmlns="http://www.w3.org/2000/svg"
+     font-family="'Latin Modern Sans', 'CMU Sans Serif', Arial, sans-serif"
+     font-size="13"
+     role="img">
+
+<title>Graphical Abstract — Football Player Role Classification via Deep Learning and XAI</title>
+<desc>End-to-end pipeline: dataset input, data preparation, three parallel classifiers (Custom CNN, MobileNetV2, ResNet50), role prediction, evaluation, and explainability (Grad-CAM, SHAP).</desc>
+
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#555" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+  <marker id="arrow-w" viewBox="0 0 10 10" refX="8" refY="5"
+          markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="#888" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </marker>
+</defs>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     BACKGROUND
+══════════════════════════════════════════════════════════════════ -->
+<rect width="680" height="820" fill="#FAFAFA" rx="0"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     TITLE
+══════════════════════════════════════════════════════════════════ -->
+<text x="340" y="28" text-anchor="middle" font-size="15" font-weight="700" fill="#1a1a1a">
+  Football Player Role Classification via Deep Learning &amp; Explainable AI
+</text>
+<text x="340" y="46" text-anchor="middle" font-size="11" fill="#555">
+  World Cup 2022 Elite Players · Custom CNN · MobileNetV2 · ResNet50 · Grad-CAM · SHAP
+</text>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 1 — DATASET
+══════════════════════════════════════════════════════════════════ -->
+<!-- box -->
+<rect x="200" y="62" width="280" height="52" rx="8"
+      fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+<text x="340" y="83" text-anchor="middle" font-size="13" font-weight="700" fill="#085041">Dataset</text>
+<text x="340" y="101" text-anchor="middle" font-size="11" fill="#0F6E56">World Cup 2022 Elite Players · 224×224 RGB</text>
+
+<!-- arrow -->
+<line x1="340" y1="114" x2="340" y2="140" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 2 — DATA PREPARATION
+══════════════════════════════════════════════════════════════════ -->
+<rect x="100" y="140" width="480" height="52" rx="8"
+      fill="#F1EFE8" stroke="#5F5E5A" stroke-width="1"/>
+<text x="340" y="161" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A">Data preparation</text>
+<text x="340" y="179" text-anchor="middle" font-size="11" fill="#5F5E5A">
+  70/15/15 train–val–test · augmentation · class-weight balancing
+</text>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 3 — ROLE CLASS PILLS
+══════════════════════════════════════════════════════════════════ -->
+<text x="340" y="212" text-anchor="middle" font-size="11" fill="#555">Target classes</text>
+
+<!-- GK -->
+<rect x="58"  y="218" width="122" height="32" rx="16"
+      fill="#FAECE7" stroke="#D85A30" stroke-width="1.2"/>
+<text x="119" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#712B13">GK — Goalkeeper</text>
+<!-- DEF -->
+<rect x="192" y="218" width="112" height="32" rx="16"
+      fill="#E1F5EE" stroke="#0F6E56" stroke-width="1.2"/>
+<text x="248" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#085041">DEF — Defender</text>
+<!-- MID -->
+<rect x="316" y="218" width="112" height="32" rx="16"
+      fill="#E6F1FB" stroke="#185FA5" stroke-width="1.2"/>
+<text x="372" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#042C53">MID — Midfielder</text>
+<!-- FWD -->
+<rect x="440" y="218" width="112" height="32" rx="16"
+      fill="#FAEEDA" stroke="#854F0B" stroke-width="1.2"/>
+<text x="496" y="238" text-anchor="middle" font-size="12" font-weight="600" fill="#412402">FWD — Forward</text>
+
+<!-- fork lines: data-prep → 3 models -->
+<line x1="340" y1="192" x2="340" y2="258" stroke="#AAA" stroke-width="1"/>
+<line x1="119" y1="258" x2="562" y2="258" stroke="#AAA" stroke-width="1"/>
+<line x1="119" y1="258" x2="119" y2="272" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="340" y1="258" x2="340" y2="272" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="562" y1="258" x2="562" y2="272" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 4 — THREE MODELS
+══════════════════════════════════════════════════════════════════ -->
+
+<!-- ── Custom CNN ── -->
+<rect x="38"  y="272" width="162" height="50" rx="8"
+      fill="#FAECE7" stroke="#993C1D" stroke-width="1"/>
+<text x="119" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#711013">Custom CNN</text>
+<text x="119" y="308" text-anchor="middle" font-size="11" fill="#993C1D">Built from scratch</text>
+<line x1="119" y1="322" x2="119" y2="336" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="38"  y="336" width="162" height="42" rx="8"
+      fill="#FAECE7" stroke="#D85A30" stroke-width="0.8" stroke-dasharray="3 2"/>
+<text x="119" y="352" text-anchor="middle" font-size="11" fill="#712B13">Conv → BN → Pool</text>
+<text x="119" y="368" text-anchor="middle" font-size="11" fill="#712B13">Dropout 0.40–0.50</text>
+
+<!-- ── MobileNetV2 ── -->
+<rect x="261" y="272" width="158" height="50" rx="8"
+      fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+<text x="340" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#04342C">MobileNetV2</text>
+<text x="340" y="308" text-anchor="middle" font-size="11" fill="#0F6E56">Transfer learning</text>
+<line x1="340" y1="322" x2="340" y2="336" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="261" y="336" width="158" height="42" rx="8"
+      fill="#E1F5EE" stroke="#1D9E75" stroke-width="0.8" stroke-dasharray="3 2"/>
+<text x="340" y="352" text-anchor="middle" font-size="11" fill="#085041">ImageNet pretrained</text>
+<text x="340" y="368" text-anchor="middle" font-size="11" fill="#085041">~3.4M params · fine-tune</text>
+
+<!-- ── ResNet50 ── -->
+<rect x="481" y="272" width="162" height="50" rx="8"
+      fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+<text x="562" y="292" text-anchor="middle" font-size="13" font-weight="700" fill="#26215C">ResNet50</text>
+<text x="562" y="308" text-anchor="middle" font-size="11" fill="#534AB7">Transfer learning</text>
+<line x1="562" y1="322" x2="562" y2="336" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="481" y="336" width="162" height="42" rx="8"
+      fill="#EEEDFE" stroke="#7F77DD" stroke-width="0.8" stroke-dasharray="3 2"/>
+<text x="562" y="352" text-anchor="middle" font-size="11" fill="#3C3489">ImageNet pretrained</text>
+<text x="562" y="368" text-anchor="middle" font-size="11" fill="#3C3489">~25M params · fine-tune</text>
+
+<!-- Anti-overfit shared banner -->
+<rect x="140" y="390" width="400" height="26" rx="6"
+      fill="none" stroke="#AAA" stroke-width="0.8" stroke-dasharray="4 3"/>
+<text x="340" y="406" text-anchor="middle" font-size="10.5" fill="#666">
+  Label smoothing 0.05 · EarlyStopping (patience=6) · ReduceLROnPlateau · Two-phase fine-tuning
+</text>
+
+<!-- merge lines: 3 models → prediction -->
+<line x1="119" y1="378" x2="119" y2="432" stroke="#AAA" stroke-width="1"/>
+<line x1="340" y1="378" x2="340" y2="432" stroke="#AAA" stroke-width="1"/>
+<line x1="562" y1="378" x2="562" y2="432" stroke="#AAA" stroke-width="1"/>
+<line x1="119" y1="432" x2="562" y2="432" stroke="#AAA" stroke-width="1"/>
+<line x1="340" y1="432" x2="340" y2="446" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 5 — PREDICTION
+══════════════════════════════════════════════════════════════════ -->
+<rect x="200" y="446" width="280" height="44" rx="8"
+      fill="#E6F1FB" stroke="#185FA5" stroke-width="1"/>
+<text x="340" y="464" text-anchor="middle" font-size="13" font-weight="700" fill="#042C53">Role prediction</text>
+<text x="340" y="480" text-anchor="middle" font-size="11" fill="#185FA5">Softmax → GK / DEF / MID / FWD</text>
+<line x1="340" y1="490" x2="340" y2="514" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 6 — EVALUATION
+══════════════════════════════════════════════════════════════════ -->
+<rect x="160" y="514" width="360" height="44" rx="8"
+      fill="#EAF3DE" stroke="#3B6D11" stroke-width="1"/>
+<text x="340" y="532" text-anchor="middle" font-size="13" font-weight="700" fill="#173404">Evaluation</text>
+<text x="340" y="548" text-anchor="middle" font-size="11" fill="#3B6D11">
+  Accuracy · Precision · Recall · F1 · Confusion matrix · Training curves
+</text>
+
+<!-- fork to XAI -->
+<line x1="340" y1="558" x2="340" y2="574" stroke="#AAA" stroke-width="1"/>
+<line x1="200" y1="574" x2="480" y2="574" stroke="#AAA" stroke-width="1"/>
+<line x1="200" y1="574" x2="200" y2="588" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="480" y1="574" x2="480" y2="588" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 7 — XAI
+══════════════════════════════════════════════════════════════════ -->
+<!-- Grad-CAM -->
+<rect x="58"  y="588" width="284" height="52" rx="8"
+      fill="#FAEEDA" stroke="#854F0B" stroke-width="1"/>
+<text x="200" y="608" text-anchor="middle" font-size="13" font-weight="700" fill="#412402">Grad-CAM</text>
+<text x="200" y="626" text-anchor="middle" font-size="11" fill="#854F0B">Spatial attention heatmaps per model</text>
+
+<!-- SHAP -->
+<rect x="338" y="588" width="284" height="52" rx="8"
+      fill="#FAECE7" stroke="#993C1D" stroke-width="1"/>
+<text x="480" y="608" text-anchor="middle" font-size="13" font-weight="700" fill="#4A1B0C">SHAP</text>
+<text x="480" y="626" text-anchor="middle" font-size="11" fill="#993C1D">Pixel-level attribution (GradientExplainer)</text>
+
+<!-- merge XAI → findings -->
+<line x1="200" y1="640" x2="200" y2="662" stroke="#AAA" stroke-width="1"/>
+<line x1="480" y1="640" x2="480" y2="662" stroke="#AAA" stroke-width="1"/>
+<line x1="200" y1="662" x2="480" y2="662" stroke="#AAA" stroke-width="1"/>
+<line x1="340" y1="662" x2="340" y2="676" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     STAGE 8 — KEY FINDINGS
+══════════════════════════════════════════════════════════════════ -->
+<rect x="38"  y="676" width="604" height="68" rx="8"
+      fill="#F1EFE8" stroke="#888780" stroke-width="1"/>
+<text x="340" y="696" text-anchor="middle" font-size="13" font-weight="700" fill="#2C2C2A">Key findings</text>
+<text x="340" y="714" text-anchor="middle" font-size="11" fill="#5F5E5A">
+  MobileNetV2 best trade-off: 75–85% acc. · ResNet50 highest F1 · Custom CNN baseline 70–75%
+</text>
+<text x="340" y="730" text-anchor="middle" font-size="11" fill="#5F5E5A">
+  Grad-CAM: jersey/gloves attended · SHAP: background suppressed · DEF/MID hardest to separate
+</text>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     LEGEND
+══════════════════════════════════════════════════════════════════ -->
+<text x="340" y="772" text-anchor="middle" font-size="10.5" fill="#888">Legend</text>
+
+<!-- Dataset / I/O -->
+<rect x="72"  y="778" width="10" height="10" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+<text x="86" y="787" font-size="10.5" fill="#555">Dataset / I-O</text>
+
+<!-- Custom CNN -->
+<rect x="178" y="778" width="10" height="10" rx="2" fill="#FAECE7" stroke="#993C1D" stroke-width="1"/>
+<text x="192" y="787" font-size="10.5" fill="#555">Custom CNN</text>
+
+<!-- MobileNetV2 -->
+<rect x="292" y="778" width="10" height="10" rx="2" fill="#E1F5EE" stroke="#0F6E56" stroke-width="1"/>
+<text x="306" y="787" font-size="10.5" fill="#555">MobileNetV2</text>
+
+<!-- ResNet50 -->
+<rect x="412" y="778" width="10" height="10" rx="2" fill="#EEEDFE" stroke="#534AB7" stroke-width="1"/>
+<text x="426" y="787" font-size="10.5" fill="#555">ResNet50</text>
+
+<!-- XAI -->
+<rect x="510" y="778" width="10" height="10" rx="2" fill="#FAEEDA" stroke="#854F0B" stroke-width="1"/>
+<text x="524" y="787" font-size="10.5" fill="#555">XAI methods</text>
+
+<!-- pipeline arrow legend -->
+<line x1="330" y1="797" x2="360" y2="797" stroke="#555" stroke-width="1.2" marker-end="url(#arrow)"/>
+<text x="307" y="801" text-anchor="end" font-size="10.5" fill="#888">pipeline flow</text>
+
+<!-- border frame -->
+<rect x="4" y="4" width="672" height="812" rx="10" fill="none" stroke="#DDD" stroke-width="1"/>
+
+</svg>
